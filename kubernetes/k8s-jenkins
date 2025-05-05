@@ -1,0 +1,50 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_IMAGE_FRONTEND = 'mernecommers'
+    }
+
+    stages {
+        stage("Clone Code") {
+            steps {
+                git url: "https://github.com/lokesh-dadhich/MernEcommers.git", branch: "main"
+            }
+        }
+
+        stage("Build Docker Images") {
+            steps {
+                sh 'docker build -t $DOCKER_IMAGE_FRONTEND .'
+            }
+        }
+
+        stage("Push to DockerHub") {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: "dockercred",
+                    usernameVariable: "dockercredUser",
+                    passwordVariable: "dockercredPass")]) {
+                        sh 'echo $dockercredPass | docker login -u $dockercredUser --password-stdin'
+                        sh 'docker image tag $DOCKER_IMAGE_FRONTEND:latest $dockercredUser/$DOCKER_IMAGE_FRONTEND:latest'
+                        sh 'docker push $dockercredUser/$DOCKER_IMAGE_FRONTEND:latest'
+                }
+            }
+        }
+
+        stage("Deploy to Kubernetes") {
+            steps {
+                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+                    script {
+                        echo "Applying Kubernetes manifests..."
+                        sh '''
+                            export KUBECONFIG=$KUBECONFIG
+                            kubectl delete -f kubernetes/namespace.yml --ignore-not-found
+                            kubectl apply -f kubernetes/namespace.yml
+                            kubectl apply -f kubernetes/frontend.yml
+                        '''
+                    }
+                }
+            }
+        }
+    }
+}
