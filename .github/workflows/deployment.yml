@@ -42,9 +42,17 @@ jobs:
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           port: ${{ secrets.EC2_PORT }}
           script: |
-            cd /home/ubuntu/MernEcommers
+            cd /home/ubuntu
 
-            # Pull latest images from DockerHub (if using imagePullPolicy: Always, this may be optional)
+            # Clone or pull latest repo
+            if [ -d "MernEcommers" ]; then
+              cd MernEcommers && git pull origin main
+            else
+              git clone https://github.com/lokesh-dadhich/MernEcommers.git
+              cd MernEcommers
+            fi
+
             sudo kubectl delete -f kubernetes/ --ignore-not-found
             sudo kubectl apply -f kubernetes/namespace.yml
             sudo kubectl apply -f kubernetes/frontend.yml
+
