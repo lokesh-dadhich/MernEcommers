@@ -42,7 +42,7 @@ jobs:
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           port: ${{ secrets.EC2_PORT }}
           script: |
-            cd /home/${{ secrets.K8S_USERNAME }}/project-folder
+            cd /home/${{ secrets.K8S_USERNAME }}/MernEcommers
 
             # Pull latest images from DockerHub (if using imagePullPolicy: Always, this may be optional)
             sudo kubectl delete -f kubernetes/ --ignore-not-found
