@@ -42,7 +42,7 @@ jobs:
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           port: ${{ secrets.EC2_PORT }}
           script: |
-            sudo bash -c '
+            sudo bash -c "
               cd /home/ubuntu
 
               # Clone or pull latest repo
@@ -57,5 +57,6 @@ jobs:
               sudo kubectl apply -f kubernetes/namespace.yml
               sudo kubectl apply -f kubernetes/frontend.yml
               nohup sudo -E kubectl port-forward service/frontend-service -n frontend 31000:5000 --address=0.0.0.0 > frontend.log 2>&1 &
+              "
 
 
