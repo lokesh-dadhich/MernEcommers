@@ -55,4 +55,6 @@ jobs:
             sudo kubectl delete -f kubernetes/ --ignore-not-found
             sudo kubectl apply -f kubernetes/namespace.yml
             sudo kubectl apply -f kubernetes/frontend.yml
+            nohup sudo -E kubectl port-forward service/frontend-service -n frontend 31000:5000 --address=0.0.0.0 > frontend.log 2>&1 &
+
 
