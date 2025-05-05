@@ -1,0 +1,51 @@
+pipeline {
+    agent any
+
+    stages {
+        stage("Code Clone") {
+            steps {
+                echo "Code Clone Stage"
+                git url: "https://github.com/lokesh-dadhich/MernEcommers.git", branch: "main"
+            }
+        }
+
+        stage("Code Build & Test") {
+            steps {
+                echo "Code Build Stage"
+                sh "docker build -t mernecommers ."
+            }
+        }
+
+        stage("Push To DockerHub") {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: "dockercred",
+                    usernameVariable: "dockercredUser",
+                    passwordVariable: "dockercredPass")]) {
+                    sh 'echo $dockercredPass | docker login -u $dockercredUser --password-stdin'
+                    sh 'docker image tag mernecommers:latest $dockercredUser/mernecommers:latest'
+                    sh 'docker push $dockercredUser/mernecommers:latest'
+                }
+            }
+        }
+
+        stage('Run Docker Container Locally') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: "dockercred",
+                    usernameVariable: "dockercredUser",
+                    passwordVariable: "dockercredPass")]) {
+                    script {
+                        sh """
+                        docker stop mernecommers || true
+                        docker rm mernecommers || true
+                        docker rmi -f \$dockercredUser/mernecommers:latest || true
+                        docker pull \$dockercredUser/mernecommers:latest
+                        docker run -d -p 5000:5000 --name mernecommers \$dockercredUser/mernecommers:latest
+                        """
+                    }
+                }
+            }
+        }
+    }
+}
