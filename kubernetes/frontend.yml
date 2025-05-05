@@ -35,4 +35,4 @@ spec:
     - port: 5000
       targetPort: 5000
       protocol: TCP
-      nodePort: 5000
+      nodePort: 31000
