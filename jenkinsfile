@@ -11,7 +11,7 @@ pipeline {
 
         stage("Code Build") {
             steps {
-                echo "Code Build Stage"
+                echo "Code Build Stage "
                 sh "docker build -t mernecommers ."
             }
         }
